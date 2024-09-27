@@ -9,47 +9,13 @@ import { setWeatherData, setLoading, setSuccess, setError } from '../Features/we
 function UserInput() {
     const [city, setCity] = useState('');
     const [userInput, setUserInput] = useState('');
-    const [geoLocation, setGeoLocation] = useState({lat:null, lon:null});
+    // const [geoLocation, setGeoLocation] = useState({lat:null, lon:null});
     const dispatch = useDispatch();
     const navigate = useNavigate();
 
-    const fetchCurrentLocation = async() => {
-        if(navigator.geolocation) {
-            navigator.geolocation.getCurrentPosition((position) => {
-                setGeoLocation({
-                    lat: position.coords.latitude,
-                    lon: position.coords.longitude
-                });
-            },
-            (error) => {
-                console.log("Error obtaining your location",error);
-            }
-        )
-        }
-        else {
-            console.log("Geolocation is not supported by this browser");
-        }
-
-        if (geoLocation.lat && geoLocation.lon) {
-            try {
-                const cityName = await axios.get('https://nominatim.openstreetmap.org/reverse',{
-                    params: {
-                        format: 'json',
-                        lat: geoLocation.lat,
-                        lon: geoLocation.lon
-                    }
-                })
-                setCity(cityName.data.address.city);
-            } catch (error) {
-                console.log(error);
-            }
-        }
-
-    }
-
     const fetchWeather = async() => {
         city?setUserInput(city):setUserInput(userInput);
-        if(userInput === '') {alert ("Please enter a city name"); return};
+        if(userInput === '') {alert ("Please enter a city name or use suggestions"); return};
 
         dispatch(setLoading(true));
         try {
@@ -60,9 +26,9 @@ function UserInput() {
                 }
             });
             dispatch(setWeatherData(response.data));
-            // dispatch(setLoading(false));
-            // dispatch(setSuccess(true));
-            // dispatch(setError(null));
+            dispatch(setLoading(false));
+            dispatch(setSuccess(true));
+            dispatch(setError(null));
             
         } catch (error) {
             dispatch(setLoading(false));
@@ -87,10 +53,7 @@ function UserInput() {
                 className='w-[95%] h-10 border-2 border-green-600 rounded-lg px-5 mt-6'
             />
             <div className='text-yellow-300 w-full h-fit flex justify-around items-center py-1 m-4 border-2 border-yellow-400 rounded-lg '>
-                <button className='w-[50%] p-1 h-fit bg-green-600 hover:bg-green-500 active:bg-green-700 rounded-3xl'
-                onClick={fetchCurrentLocation}
-                >Get weather of <br /> your current location</button>
-                <button className='w-[30%] p-1 h-full bg-green-600 rounded-3xl'
+                <button className='w-[90%] p-1 h-full bg-green-600 rounded-3xl'
                 onClick={fetchWeather}
                 >Get Weather of : {userInput}</button>
             </div>
